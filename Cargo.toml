@@ -3,7 +3,10 @@ name = "random-algorithms-homework"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
 
 [dependencies]
-clap = "3.1.8"
+anyhow = "1.0.56"
+clap = { version = "3.1.8", features = ["derive"] }
+nameof = "1.2.2"
+rand = "0.8.5"
