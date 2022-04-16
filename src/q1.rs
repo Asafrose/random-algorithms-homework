@@ -1,68 +1,92 @@
-use anyhow::{Error, Result};
+use anyhow::{Error, Ok, Result};
 use clap::Args;
+use log::{debug, info};
 use nameof::name_of;
-
-use crate::hash_function::HashFunction;
+use rand::{prelude::SliceRandom, Rng};
 
 #[derive(Debug, Args)]
 pub struct Q1Command {
-    #[clap(short)]
-    n: usize,
-    #[clap(short, long)]
-    array: String,
+    ///Length of the array that will be generated
+    #[clap(short, long, default_value = "1000")]
+    array_length: usize,
+    ///Amount of times the algorithm will run
+    #[clap(short, long, default_value = "1000")]
+    repeat_count: usize,
 }
 
 impl Q1Command {
     pub fn invoke(&self) -> Result<()> {
-        let array = parse_array(&self.array, self.n.try_into()?)?;
+        info!(
+            "invoke started [{}={} {}={}]",
+            name_of!(array_length in Self),
+            self.array_length,
+            name_of!(repeat_count in Self),
+            self.repeat_count
+        );
 
-        if array.len() != self.n {
-            return Err(Error::msg(format!(
-                "Incorrect array length [{}={} {}={}]",
-                name_of!(n in Self),
-                self.n,
-                name_of!(array),
-                array.len()
-            )));
+        let array = build_array(&self.array_length);
+        let max = array.iter().max().ok_or(Error::msg("Failed to get max"))?;
+
+        let mut results = Vec::with_capacity(self.repeat_count);
+
+        for _ in 0..self.repeat_count {
+            results.push(invoke_internal(&array)?)
         }
-        invoke_internal(&array)?;
+
+        let hit_count = results.iter().filter(|result| **result == *max).count();
+        let hit_percent = (hit_count as f32 / self.repeat_count as f32) * 100.0;
+        let average = results.iter().sum::<usize>() as f32 / results.len() as f32;
+
+        info!(
+            "invoke finished [{}={} {}={} {}={}]",
+            name_of!(max),
+            max,
+            name_of!(hit_percent),
+            hit_percent,
+            name_of!(average),
+            average
+        );
+
         Ok(())
     }
 }
 
-fn invoke_internal(array: &Vec<i32>) -> Result<i32> {
-    let n = array.len().try_into()?;
-    let hash_function = HashFunction::new(0..n, 0..n);
+fn invoke_internal(array: &Vec<usize>) -> Result<usize> {
+    debug!("{} started", name_of!(invoke_internal));
 
-    let threshold = array
+    let n = array.len();
+    let mut permutation = array.clone();
+    permutation.shuffle(&mut rand::thread_rng());
+
+    let threshold = permutation
         .iter()
-        .take(array.len() / 2)
-        .map(|x| hash_function.get_value(x.clone()))
+        .take(n / 2)
         .max()
         .ok_or(Error::msg("failed to get maximum"))?;
 
-    array
+    let result = permutation
         .iter()
-        .skip(array.len() / 2 + 1)
-        .map(|item| hash_function.get_value(item.clone()))
-        .filter(|item| item >= &threshold)
+        .skip(array.len() / 2)
+        .filter(|item| **item >= *threshold)
         .next()
         .map_or(
-            Ok(hash_function.get_value(array.last().ok_or(Error::msg("no items in array"))?.clone())),
-            |item| Ok(item),
-        )
+            array.last().ok_or(Error::msg("no items in array"))?.clone(),
+            |item| item.clone(),
+        );
+
+    debug!(
+        "{} finished [{}={}]",
+        name_of!(invoke_internal),
+        name_of!(result),
+        result
+    );
+
+    Ok(result)
 }
 
-fn parse_array(array_string: &String, size: usize) -> Result<Vec<i32>> {
-    let mut array = Vec::with_capacity(size);
-
-    for item in array_string
-        .split(",")
-        .map(|token| token.trim())
-        .map(|token| token.parse::<i32>())
-    {
-        array.push(item?);
-    }
-
-    Ok(array)
+fn build_array(array_size: &usize) -> Vec<usize> {
+    let mut thread_rng = rand::thread_rng();
+    (0..*array_size)
+        .map(|_| thread_rng.gen_range(0..10000))
+        .collect()
 }

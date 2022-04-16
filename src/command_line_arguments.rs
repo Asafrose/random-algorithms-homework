@@ -17,6 +17,7 @@ impl CommandLineArguments {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    ///Run Question One program
     Q1(Q1Command)
 }
 

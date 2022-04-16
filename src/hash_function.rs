@@ -1,16 +1,16 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 use rand::Rng;
 
-pub struct HashFunction {
-    map: HashMap<i32, i32>,
+pub struct HashFunction<TSourceItem: Hash + Eq,TTargetItem : Clone + Copy> {
+    map: HashMap<TSourceItem,TTargetItem>,
 }
 
-impl HashFunction {
-    pub fn new<TSource: IntoIterator<Item = i32>, TTarget: IntoIterator<Item = i32>>(
+impl<TSourceItem: Hash + Eq,TTargetItem : Clone + Copy> HashFunction<TSourceItem,TTargetItem> {
+    pub fn new<TSource: IntoIterator<Item = TSourceItem>, TTarget: IntoIterator<Item = TTargetItem>>(
         source: TSource,
         target: TTarget,
     ) -> Self {
-        let target = target.into_iter().collect::<Vec<i32>>();
+        let target = target.into_iter().collect::<Vec<TTargetItem>>();
 
         let mut thread_rng = rand::thread_rng();
 
@@ -22,7 +22,7 @@ impl HashFunction {
         }
     }
 
-    pub fn get_value(&self, x: i32) -> i32 {
-        self.map.get(&x).unwrap().clone()
+    pub fn get_value(&self, x: &TSourceItem) -> TTargetItem {
+        self.map.get(x).unwrap().clone()
     }
 }
