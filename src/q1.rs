@@ -2,7 +2,9 @@ use anyhow::{Error, Ok, Result};
 use clap::Args;
 use log::{debug, info};
 use nameof::name_of;
-use rand::{prelude::SliceRandom, Rng};
+use rand::{prelude::SliceRandom};
+
+use crate::extensions::vec_extensions::VecExtensions;
 
 #[derive(Debug, Args)]
 pub struct Q1Command {
@@ -24,7 +26,7 @@ impl Q1Command {
             self.repeat_count
         );
 
-        let array = build_array(&self.array_length);
+        let array = Vec::with_random_items_in_range(self.array_length, || 0..10000);
         let max = array.iter().max().ok_or(Error::msg("Failed to get max"))?;
 
         let mut results = Vec::with_capacity(self.repeat_count);
@@ -82,11 +84,4 @@ fn invoke_internal(array: &Vec<usize>) -> Result<usize> {
     );
 
     Ok(result)
-}
-
-fn build_array(array_size: &usize) -> Vec<usize> {
-    let mut thread_rng = rand::thread_rng();
-    (0..*array_size)
-        .map(|_| thread_rng.gen_range(0..10000))
-        .collect()
 }
