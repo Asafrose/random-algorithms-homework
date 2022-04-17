@@ -1,23 +1,45 @@
-use clap::Args;
 use anyhow::Result;
-use log::info;
-use nameof::name_of;
 
-use super::{invoke_internal, get_l2_norm};
+use crate::{
+    algorithm::Algorithm,
+    repetition_algorithm::{
+        RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
+    },
+};
 
-#[derive(Debug, Args)]
-pub struct Q2NaiveCommand;
+use super::l2_algorithm::L2Algorithm;
 
-impl Q2NaiveCommand {
-    pub fn invoke(&self, array: &Vec<i32>) -> Result<()> {
-        info!("invoke started");
-        let results: Vec<i32> = (0..1000).map(|_| invoke_internal(array)).collect();
-        
-        let average = results.iter().sum::<i32>() as f32 / results.len() as f32;
-        let l2_norm = get_l2_norm(array);
+#[derive(Debug)]
+pub struct Q2NativeAlgorithmResult {
+    _average: f32,
+    _l2_norm: i32,
+}
 
-        info!("invoke finished [{}={} {}={}]", name_of!(average), average, name_of!(l2_norm), l2_norm);
+impl RepetitionAlgorithmResult<Vec<i32>, i32> for Q2NativeAlgorithmResult {
+    fn new(input: &Vec<i32>, series: Vec<i32>) -> Result<Self> {
+        let average = series.iter().sum::<i32>() as f32 / series.len() as f32;
+        let l2_norm = L2Algorithm::get_l2_norm(&input);
 
-        Ok(())
+        Ok(Q2NativeAlgorithmResult {
+            _average: average,
+            _l2_norm: l2_norm,
+        })
+    }
+}
+
+pub struct Q2NaiveAlgorithm;
+
+impl Algorithm<Vec<i32>, Q2NativeAlgorithmResult> for Q2NaiveAlgorithm {
+    fn name() -> String {
+        "q2 naive algorithm".into()
+    }
+
+    fn run_internal(input: &Vec<i32>) -> Result<Q2NativeAlgorithmResult> {
+        RepetitionAlgorithm::<L2Algorithm, Q2NativeAlgorithmResult, Vec<i32>, i32>::run_internal(
+            &RepetitionAlgorithmInput {
+                input: input.clone(),
+                repetition_count: 1000,
+            },
+        )
     }
 }
