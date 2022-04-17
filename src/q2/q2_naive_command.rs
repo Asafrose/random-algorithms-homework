@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::{
+use crate::common::{
     algorithm::Algorithm,
     repetition_algorithm::{
         RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,

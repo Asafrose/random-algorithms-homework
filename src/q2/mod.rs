@@ -6,7 +6,7 @@ mod q2_naive_command;
 use anyhow::Result;
 use clap::{Args, Subcommand};
 
-use crate::{algorithm::Algorithm, extensions::vec_extensions::VecExtensions};
+use crate::{common::algorithm::Algorithm, extensions::vec_extensions::VecExtensions};
 
 use self::{q2_amplificated_command::Q2AmplificatedCommand, q2_naive_command::Q2NaiveAlgorithm};
 

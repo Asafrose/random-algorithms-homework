@@ -2,7 +2,7 @@ use anyhow::{Ok, Result};
 use clap::Args;
 use nameof::name_of;
 
-use crate::{
+use crate::common::{
     algorithm::Algorithm,
     repetition_algorithm::{
         RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,

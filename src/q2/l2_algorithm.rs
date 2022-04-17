@@ -2,7 +2,7 @@ use anyhow::Result;
 use log::debug;
 use nameof::name_of;
 
-use crate::{algorithm::Algorithm, q2::hash_function::HashFunction};
+use crate::{common::algorithm::Algorithm, q2::hash_function::HashFunction};
 
 pub struct L2Algorithm();
 

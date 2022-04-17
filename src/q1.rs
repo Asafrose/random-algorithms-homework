@@ -5,11 +5,13 @@ use nameof::name_of;
 use rand::prelude::SliceRandom;
 
 use crate::{
-    algorithm::Algorithm,
-    extensions::vec_extensions::VecExtensions,
-    repetition_algorithm::{
-        RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
+    common::{
+        algorithm::Algorithm,
+        repetition_algorithm::{
+            RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
+        },
     },
+    extensions::vec_extensions::VecExtensions,
 };
 
 #[derive(Debug)]

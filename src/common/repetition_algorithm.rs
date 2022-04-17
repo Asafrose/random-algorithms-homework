@@ -3,7 +3,7 @@ use std::{fmt::Debug, marker::PhantomData};
 use anyhow::Result;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-use crate::algorithm::Algorithm;
+use super::algorithm::Algorithm;
 
 pub trait RepetitionAlgorithmResult<TInput, TOutput: Debug>: Debug + Sized {
     fn new(input: &TInput, series: Vec<TOutput>) -> Result<Self>;
