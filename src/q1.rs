@@ -11,7 +11,7 @@ use crate::{
             RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
         },
     },
-    extensions::vec_extensions::VecExtensions,
+    extensions::vec_extensions::SampleUniformVecExtensions,
 };
 
 #[derive(Debug)]

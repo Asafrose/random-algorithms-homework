@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use crate::q2::Q2Command;
+use crate::{q2::Q2Command, q3::Q3Command};
 
 use super::q1::Q1Command;
 
@@ -22,7 +22,8 @@ enum Commands {
     ///Run Question1 program
     Q1(Q1Command),
     ///Run Question2 program
-    Q2(Q2Command)
+    Q2(Q2Command),
+    Q3(Q3Command)
 }
 
 impl Commands {
@@ -30,6 +31,7 @@ impl Commands {
         match self {
             Commands::Q1(command) => command.invoke(),
             Commands::Q2(command) => command.invoke(),
+            Commands::Q3(command) => command.invoke(),
         }
     }
 }

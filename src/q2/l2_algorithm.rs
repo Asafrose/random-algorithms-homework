@@ -26,9 +26,3 @@ impl Algorithm<Vec<i32>, i32> for L2Algorithm {
         Ok(result)
     }
 }
-
-impl L2Algorithm {
-    pub fn get_l2_norm(array: &Vec<i32>) -> i32 {
-        array.iter().map(|num| num.pow(2)).sum()
-    }
-}

@@ -2,12 +2,12 @@ use anyhow::{Ok, Result};
 use clap::Args;
 use nameof::name_of;
 
-use crate::common::{
+use crate::{common::{
     algorithm::Algorithm,
     repetition_algorithm::{
         RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
     },
-};
+}, extensions::vec_extensions::L2NormVecExtension};
 
 use super::l2_algorithm::L2Algorithm;
 
@@ -151,7 +151,7 @@ impl
         series: Vec<L2SecondAmplificationAlgorithmResult>,
     ) -> Result<Self> {
         let l2_norm: f64 =
-            L2Algorithm::get_l2_norm(&input.first_amplification_input.array).try_into()?;
+            input.first_amplification_input.array.l2_norm().try_into()?;
         let epsilon = input.first_amplification_input.epsilon;
 
         let lower_bar = (1.0 - epsilon) * l2_norm;

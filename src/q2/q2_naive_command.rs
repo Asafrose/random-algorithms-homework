@@ -1,11 +1,11 @@
 use anyhow::Result;
 
-use crate::common::{
+use crate::{common::{
     algorithm::Algorithm,
     repetition_algorithm::{
         RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
     },
-};
+}, extensions::vec_extensions::L2NormVecExtension};
 
 use super::l2_algorithm::L2Algorithm;
 
@@ -18,7 +18,7 @@ pub struct Q2NativeAlgorithmResult {
 impl RepetitionAlgorithmResult<Vec<i32>, i32> for Q2NativeAlgorithmResult {
     fn new(input: &Vec<i32>, series: Vec<i32>) -> Result<Self> {
         let average = series.iter().sum::<i32>() as f32 / series.len() as f32;
-        let l2_norm = L2Algorithm::get_l2_norm(&input);
+        let l2_norm = input.l2_norm();
 
         Ok(Q2NativeAlgorithmResult {
             _average: average,

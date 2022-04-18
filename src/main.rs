@@ -7,6 +7,7 @@ mod command_line_arguments;
 mod extensions;
 mod q1;
 mod q2;
+mod q3;
 
 fn main() {
     let env = Env::new().default_filter_or("info");
