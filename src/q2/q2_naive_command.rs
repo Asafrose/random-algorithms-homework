@@ -1,11 +1,14 @@
 use anyhow::Result;
 
-use crate::{common::{
-    algorithm::Algorithm,
-    repetition_algorithm::{
-        RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
+use crate::{
+    common::{
+        algorithm::Algorithm,
+        repetition_algorithm::{
+            RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
+        },
     },
-}, extensions::vec_extensions::L2NormVecExtension};
+    extensions::vec_extensions::L2NormVecExtension,
+};
 
 use super::l2_algorithm::L2Algorithm;
 
@@ -27,17 +30,22 @@ impl RepetitionAlgorithmResult<Vec<i32>, i32> for Q2NativeAlgorithmResult {
     }
 }
 
+#[derive(Debug)]
+pub struct Q2NaiveAlgorithmInput {
+    pub array: Vec<i32>,
+}
+
 pub struct Q2NaiveAlgorithm;
 
-impl Algorithm<Vec<i32>, Q2NativeAlgorithmResult> for Q2NaiveAlgorithm {
+impl Algorithm<Q2NaiveAlgorithmInput, Q2NativeAlgorithmResult> for Q2NaiveAlgorithm {
     fn name() -> String {
         "q2 naive algorithm".into()
     }
 
-    fn run_internal(input: &Vec<i32>) -> Result<Q2NativeAlgorithmResult> {
+    fn run_internal(input: &Q2NaiveAlgorithmInput) -> Result<Q2NativeAlgorithmResult> {
         RepetitionAlgorithm::<L2Algorithm, Q2NativeAlgorithmResult, Vec<i32>, i32>::run_internal(
             &RepetitionAlgorithmInput {
-                input: input.clone(),
+                input: input.array.clone(),
                 repetition_count: 1000,
             },
         )

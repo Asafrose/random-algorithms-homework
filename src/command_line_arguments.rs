@@ -23,6 +23,7 @@ enum Commands {
     Q1(Q1Command),
     ///Run Question2 program
     Q2(Q2Command),
+    ///Run Question3 program
     Q3(Q3Command)
 }
 

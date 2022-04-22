@@ -1,6 +1,7 @@
 use std::{fmt::Debug, marker::PhantomData};
 
 use anyhow::Result;
+use indicatif::{ProgressBar, ProgressStyle};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use super::algorithm::Algorithm;
@@ -15,10 +16,10 @@ pub struct RepetitionAlgorithm<
     TInput: Debug,
     TOutput: Debug,
 > {
-    phantom1: PhantomData<TAlgorithm>,
-    phantom2: PhantomData<TRepetitionAlgorithmResult>,
-    phantom3: PhantomData<TInput>,
-    phantom4: PhantomData<TOutput>,
+    _phantom1: PhantomData<TAlgorithm>,
+    _phantom2: PhantomData<TRepetitionAlgorithmResult>,
+    _phantom3: PhantomData<TInput>,
+    _phantom4: PhantomData<TOutput>,
 }
 
 #[derive(Debug)]
@@ -43,14 +44,27 @@ impl<
         input: &RepetitionAlgorithmInput<TInput>,
     ) -> Result<TRepetitionAlgorithmResult> {
         let mut series = Vec::with_capacity(input.repetition_count);
+        let progress_bar = ProgressBar::new(input.repetition_count.try_into()?)
+            .with_style(
+                ProgressStyle::default_bar()
+                    .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+                    .progress_chars("##-"),
+            )
+            .with_message(Self::name());
 
         for item in (0..input.repetition_count)
             .into_par_iter()
-            .map(|_| TAlgorithm::run_internal(&input.input))
+            .map(|_| {
+                let result = TAlgorithm::run_internal(&input.input);
+                progress_bar.inc(1);
+                result
+            })
             .collect::<Vec<Result<TOutput>>>()
         {
             series.push(item?);
         }
+
+        progress_bar.finish_and_clear();
 
         TRepetitionAlgorithmResult::new(&input.input, series)
     }

@@ -4,7 +4,9 @@ use std::{
     ops::{Index, IndexMut, Mul},
 };
 
-use anyhow::{Error, Ok, Result};
+use anyhow::{Error, Result};
+
+use crate::extensions::vec_extensions::{Single, TryCollect};
 
 #[derive(Debug, Clone)]
 pub struct Matrix<TItem> {
@@ -73,12 +75,12 @@ where
 
 impl<TItem: Default + Mul + Copy> Mul<Vec<TItem>> for Matrix<TItem>
 where
-    TItem::Output: Default + Sum,
+    TItem::Output: Default + Sum + Copy,
 {
-    type Output = Result<Matrix<TItem::Output>>;
+    type Output = Result<Vec<TItem::Output>>;
 
     fn mul(self, rhs: Vec<TItem>) -> Self::Output {
-        self * (Matrix::from(rhs))
+        (self * (Matrix::from(rhs)))?.try_into()
     }
 }
 
@@ -137,6 +139,14 @@ impl<TItem> From<Vec<TItem>> for Matrix<TItem> {
             n: 1,
             inner: source.into_iter().map(|item| vec![item]).collect(),
         }
+    }
+}
+
+impl<TItem: Copy> TryInto<Vec<TItem>> for Matrix<TItem> {
+    type Error = Error;
+
+    fn try_into(self) -> Result<Vec<TItem>, Self::Error> {
+        self.inner.into_iter().map(|vec| vec.single()).try_collect()
     }
 }
 

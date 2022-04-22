@@ -1,9 +1,8 @@
 use clap::StructOpt;
 use command_line_arguments::CommandLineArguments;
 use env_logger::Env;
-
-mod common;
 mod command_line_arguments;
+mod common;
 mod extensions;
 mod q1;
 mod q2;

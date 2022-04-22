@@ -2,20 +2,25 @@ use anyhow::{Ok, Result};
 use clap::Args;
 use nameof::name_of;
 
-use crate::{common::{
-    algorithm::Algorithm,
-    repetition_algorithm::{
-        RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
+use crate::{
+    common::{
+        algorithm::Algorithm,
+        repetition_algorithm::{
+            RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
+        },
     },
-}, extensions::vec_extensions::L2NormVecExtension};
+    extensions::vec_extensions::L2NormVecExtension,
+};
 
 use super::l2_algorithm::L2Algorithm;
 
 #[derive(Debug, Args)]
 pub struct Q2AmplificatedCommand {
-    #[clap(short, long)]
+    ///epsilon value
+    #[clap(short, long, default_value = "0.5")]
     epsilon: f64,
-    #[clap(short, long)]
+    ///delta value
+    #[clap(short, long, default_value = "0.01")]
     delta: f64,
 }
 
@@ -43,7 +48,7 @@ impl Q2AmplificatedCommand {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 struct L2FirstAmplificationAlgorithmInput {
     array: Vec<i32>,
     epsilon: f64,
@@ -76,7 +81,7 @@ impl Algorithm<L2FirstAmplificationAlgorithmInput, L2FirstAmplificationAlgorithm
     ) -> Result<L2FirstAmplificationAlgorithmResult> {
         RepetitionAlgorithm::<L2Algorithm, L2FirstAmplificationAlgorithmResult, Vec<i32>, i32>::run_internal(&RepetitionAlgorithmInput{
             input: input.array.clone(),
-            repetition_count: (9.0/ input.epsilon).ceil() as usize
+            repetition_count: (9.0/ input.epsilon).ceil() as usize,
         })
     }
 }
@@ -129,7 +134,10 @@ impl Algorithm<L2SecondAmplificationAlgorithmInput, L2SecondAmplificationAlgorit
             L2FirstAmplificationAlgorithmInput,
             L2FirstAmplificationAlgorithmResult,
         >::run_internal(&RepetitionAlgorithmInput {
-            input: input.first_amplification_input.clone(),
+            input: L2FirstAmplificationAlgorithmInput {
+                array: input.first_amplification_input.array.clone(),
+                epsilon: input.first_amplification_input.epsilon,
+            },
             repetition_count: (18.0 * (2.0 / input.delta).ln() + 1.0).floor() as usize,
         })
     }
@@ -150,8 +158,7 @@ impl
         input: &L2SecondAmplificationAlgorithmInput,
         series: Vec<L2SecondAmplificationAlgorithmResult>,
     ) -> Result<Self> {
-        let l2_norm: f64 =
-            input.first_amplification_input.array.l2_norm().try_into()?;
+        let l2_norm: f64 = input.first_amplification_input.array.l2_norm().try_into()?;
         let epsilon = input.first_amplification_input.epsilon;
 
         let lower_bar = (1.0 - epsilon) * l2_norm;
@@ -166,7 +173,7 @@ impl
         let succession_ratio = succession_count as f64 / series.len() as f64;
 
         Ok(Q2AmplificatedAlgorithmResult {
-            _succession_ratio: succession_ratio,
+            _succession_ratio: succession_ratio * 100.0,
         })
     }
 }
