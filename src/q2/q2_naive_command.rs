@@ -30,24 +30,33 @@ impl RepetitionAlgorithmResult<Vec<i32>, i32> for Q2NativeAlgorithmResult {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Q2NaiveAlgorithmInput {
     pub array: Vec<i32>,
 }
 
-pub struct Q2NaiveAlgorithm;
+pub struct Q2NaiveAlgorithm {
+    inner: RepetitionAlgorithm<L2Algorithm, Q2NativeAlgorithmResult, Vec<i32>, i32>,
+}
 
 impl Algorithm<Q2NaiveAlgorithmInput, Q2NativeAlgorithmResult> for Q2NaiveAlgorithm {
     fn name() -> String {
         "q2 naive algorithm".into()
     }
 
-    fn run_internal(input: &Q2NaiveAlgorithmInput) -> Result<Q2NativeAlgorithmResult> {
-        RepetitionAlgorithm::<L2Algorithm, Q2NativeAlgorithmResult, Vec<i32>, i32>::run_internal(
-            &RepetitionAlgorithmInput {
-                input: input.array.clone(),
-                repetition_count: 1000,
-            },
-        )
+    fn run_internal(&self) -> Result<Q2NativeAlgorithmResult> {
+        self.inner.run_internal()
+    }
+
+    fn new(input: Q2NaiveAlgorithmInput, is_update_progress: bool) -> Self {
+        Self {
+            inner: RepetitionAlgorithm::<L2Algorithm, Q2NativeAlgorithmResult, Vec<i32>, i32>::new(
+                RepetitionAlgorithmInput {
+                    input: input.array.clone(),
+                    repetition_count: 1000,
+                },
+                is_update_progress
+            ),
+        }
     }
 }

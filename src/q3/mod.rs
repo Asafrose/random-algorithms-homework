@@ -1,4 +1,3 @@
-
 use anyhow::Result;
 use clap::Args;
 use log::warn;
@@ -44,24 +43,26 @@ impl Q3Command {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct JonsonLindenshtrassAlgorithmInput {
     n: usize,
     epsilon: f64,
     delta: f64,
 }
 
-struct JonsonLindenshtrassAlgorithm;
+struct JonsonLindenshtrassAlgorithm{
+    input: JonsonLindenshtrassAlgorithmInput
+}
 
 impl Algorithm<JonsonLindenshtrassAlgorithmInput, Matrix<f64>> for JonsonLindenshtrassAlgorithm {
     fn name() -> String {
         "Jonson Lindenshtrass Algorithm".into()
     }
 
-    fn run_internal(input: &JonsonLindenshtrassAlgorithmInput) -> Result<Matrix<f64>> {
-        let k = 21.0 * ((1.0 / input.delta).ln()) / input.epsilon.powi(2);
+    fn run_internal(&self) -> Result<Matrix<f64>> {
+        let k = 21.0 * ((1.0 / self.input.delta).ln()) / self.input.epsilon.powi(2);
 
-        let mut matrix = Matrix::new(input.n, k.ceil() as usize);
+        let mut matrix = Matrix::new(self.input.n, k.ceil() as usize);
 
         let distribution = Normal::new(0.0, 1.0)?;
         let mut rng = rand::thread_rng();
@@ -73,6 +74,12 @@ impl Algorithm<JonsonLindenshtrassAlgorithmInput, Matrix<f64>> for JonsonLindens
         }
 
         Ok(matrix * (1.0 / k.sqrt()))
+    }
+
+    fn new(input: JonsonLindenshtrassAlgorithmInput, _is_update_progress: bool) -> Self {
+        Self{
+            input
+        }
     }
 }
 
@@ -110,26 +117,37 @@ impl RepetitionAlgorithmResult<Q3AlgorithmInput, Matrix<f64>> for Q3AlgorithmRes
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Q3AlgorithmInput {
     array: Vec<f64>,
     epsilon: f64,
     delta: f64,
 }
 
-struct Q3AlgorithmInner;
+struct Q3AlgorithmInner {
+    inner: JonsonLindenshtrassAlgorithm,
+}
 
 impl Algorithm<Q3AlgorithmInput, Matrix<f64>> for Q3AlgorithmInner {
     fn name() -> String {
         JonsonLindenshtrassAlgorithm::name()
     }
 
-    fn run_internal(input: &Q3AlgorithmInput) -> Result<Matrix<f64>> {
-        JonsonLindenshtrassAlgorithm::run_internal(&JonsonLindenshtrassAlgorithmInput {
-            n: 1000,
-            epsilon: input.epsilon,
-            delta: input.delta,
-        })
+    fn run_internal(&self) -> Result<Matrix<f64>> {
+        self.inner.run_internal()
+    }
+
+    fn new(input: Q3AlgorithmInput, is_update_progress: bool) -> Self {
+        Self {
+            inner: JonsonLindenshtrassAlgorithm::new(
+                JonsonLindenshtrassAlgorithmInput {
+                    n: 1000,
+                    epsilon: input.epsilon,
+                    delta: input.delta,
+                },
+                is_update_progress
+            ),
+        }
     }
 }
 

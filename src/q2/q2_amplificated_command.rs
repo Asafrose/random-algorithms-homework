@@ -48,7 +48,7 @@ impl Q2AmplificatedCommand {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct L2FirstAmplificationAlgorithmInput {
     array: Vec<i32>,
     epsilon: f64,
@@ -67,7 +67,9 @@ impl RepetitionAlgorithmResult<Vec<i32>, i32> for L2FirstAmplificationAlgorithmR
     }
 }
 
-struct L2FirstAmplificationAlgorithm;
+struct L2FirstAmplificationAlgorithm {
+    inner: RepetitionAlgorithm<L2Algorithm, L2FirstAmplificationAlgorithmResult, Vec<i32>, i32>,
+}
 
 impl Algorithm<L2FirstAmplificationAlgorithmInput, L2FirstAmplificationAlgorithmResult>
     for L2FirstAmplificationAlgorithm
@@ -76,17 +78,32 @@ impl Algorithm<L2FirstAmplificationAlgorithmInput, L2FirstAmplificationAlgorithm
         "l2 first amplification algorithm".into()
     }
 
-    fn run_internal(
-        input: &L2FirstAmplificationAlgorithmInput,
-    ) -> Result<L2FirstAmplificationAlgorithmResult> {
-        RepetitionAlgorithm::<L2Algorithm, L2FirstAmplificationAlgorithmResult, Vec<i32>, i32>::run_internal(&RepetitionAlgorithmInput{
-            input: input.array.clone(),
-            repetition_count: (9.0/ input.epsilon).ceil() as usize,
-        })
+    fn run_internal(&self) -> Result<L2FirstAmplificationAlgorithmResult> {
+        self.inner.run_internal()
+    }
+
+    fn new(
+        input: L2FirstAmplificationAlgorithmInput,
+        is_update_progress: bool
+    ) -> Self {
+        Self {
+            inner: RepetitionAlgorithm::<
+                L2Algorithm,
+                L2FirstAmplificationAlgorithmResult,
+                Vec<i32>,
+                i32,
+            >::new(
+                RepetitionAlgorithmInput {
+                    input: input.array.clone(),
+                    repetition_count: (9.0 / input.epsilon).ceil() as usize,
+                },
+                is_update_progress
+            ),
+        }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct L2SecondAmplificationAlgorithmInput {
     first_amplification_input: L2FirstAmplificationAlgorithmInput,
     delta: f64,
@@ -116,7 +133,14 @@ impl
     }
 }
 
-struct L2SecondAmplificationAlgorithm;
+struct L2SecondAmplificationAlgorithm {
+    inner: RepetitionAlgorithm<
+        L2FirstAmplificationAlgorithm,
+        L2SecondAmplificationAlgorithmResult,
+        L2FirstAmplificationAlgorithmInput,
+        L2FirstAmplificationAlgorithmResult,
+    >,
+}
 
 impl Algorithm<L2SecondAmplificationAlgorithmInput, L2SecondAmplificationAlgorithmResult>
     for L2SecondAmplificationAlgorithm
@@ -125,21 +149,31 @@ impl Algorithm<L2SecondAmplificationAlgorithmInput, L2SecondAmplificationAlgorit
         "l2 second amplification algorithm".into()
     }
 
-    fn run_internal(
-        input: &L2SecondAmplificationAlgorithmInput,
-    ) -> Result<L2SecondAmplificationAlgorithmResult> {
-        RepetitionAlgorithm::<
-            L2FirstAmplificationAlgorithm,
-            L2SecondAmplificationAlgorithmResult,
-            L2FirstAmplificationAlgorithmInput,
-            L2FirstAmplificationAlgorithmResult,
-        >::run_internal(&RepetitionAlgorithmInput {
-            input: L2FirstAmplificationAlgorithmInput {
-                array: input.first_amplification_input.array.clone(),
-                epsilon: input.first_amplification_input.epsilon,
-            },
-            repetition_count: (18.0 * (2.0 / input.delta).ln() + 1.0).floor() as usize,
-        })
+    fn run_internal(&self) -> Result<L2SecondAmplificationAlgorithmResult> {
+        self.inner.run_internal()
+    }
+
+    fn new(
+        input: L2SecondAmplificationAlgorithmInput,
+        is_update_progress: bool
+    ) -> Self {
+        Self {
+            inner: RepetitionAlgorithm::<
+                L2FirstAmplificationAlgorithm,
+                L2SecondAmplificationAlgorithmResult,
+                L2FirstAmplificationAlgorithmInput,
+                L2FirstAmplificationAlgorithmResult,
+            >::new(
+                RepetitionAlgorithmInput {
+                    input: L2FirstAmplificationAlgorithmInput {
+                        array: input.first_amplification_input.array.clone(),
+                        epsilon: input.first_amplification_input.epsilon,
+                    },
+                    repetition_count: (18.0 * (2.0 / input.delta).ln() + 1.0).floor() as usize,
+                },
+                is_update_progress
+            ),
+        }
     }
 }
 
@@ -178,14 +212,21 @@ impl
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Q2AmplificatedAlgorithmInput {
     array: Vec<i32>,
     epsilon: f64,
     delta: f64,
 }
 
-struct Q2AmplificatedAlgorithm;
+struct Q2AmplificatedAlgorithm {
+    inner: RepetitionAlgorithm<
+        L2SecondAmplificationAlgorithm,
+        Q2AmplificatedAlgorithmResult,
+        L2SecondAmplificationAlgorithmInput,
+        L2SecondAmplificationAlgorithmResult,
+    >,
+}
 
 impl Algorithm<Q2AmplificatedAlgorithmInput, Q2AmplificatedAlgorithmResult>
     for Q2AmplificatedAlgorithm
@@ -194,21 +235,33 @@ impl Algorithm<Q2AmplificatedAlgorithmInput, Q2AmplificatedAlgorithmResult>
         "q2 amplificated algorithm".into()
     }
 
-    fn run_internal(input: &Q2AmplificatedAlgorithmInput) -> Result<Q2AmplificatedAlgorithmResult> {
-        RepetitionAlgorithm::<
-            L2SecondAmplificationAlgorithm,
-            Q2AmplificatedAlgorithmResult,
-            L2SecondAmplificationAlgorithmInput,
-            L2SecondAmplificationAlgorithmResult,
-        >::run_internal(&RepetitionAlgorithmInput {
-            input: L2SecondAmplificationAlgorithmInput {
-                first_amplification_input: L2FirstAmplificationAlgorithmInput {
-                    array: input.array.clone(),
-                    epsilon: input.epsilon,
+    fn run_internal(&self) -> Result<Q2AmplificatedAlgorithmResult> {
+        self.inner.run_internal()
+    }
+
+    fn new(
+        input: Q2AmplificatedAlgorithmInput,
+        is_update_progress: bool
+    ) -> Self {
+        Self {
+            inner: RepetitionAlgorithm::<
+                L2SecondAmplificationAlgorithm,
+                Q2AmplificatedAlgorithmResult,
+                L2SecondAmplificationAlgorithmInput,
+                L2SecondAmplificationAlgorithmResult,
+            >::new(
+                RepetitionAlgorithmInput {
+                    input: L2SecondAmplificationAlgorithmInput {
+                        first_amplification_input: L2FirstAmplificationAlgorithmInput {
+                            array: input.array.clone(),
+                            epsilon: input.epsilon,
+                        },
+                        delta: input.delta,
+                    },
+                    repetition_count: 1000,
                 },
-                delta: input.delta,
-            },
-            repetition_count: 1000,
-        })
+                is_update_progress
+            ),
+        }
     }
 }

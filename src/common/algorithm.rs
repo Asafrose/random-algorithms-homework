@@ -1,17 +1,21 @@
 use std::fmt::Debug;
 
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use log::info;
 use nameof::name_of;
 
-pub trait Algorithm<TInput: Debug, TOutput: Debug> {
+pub trait Algorithm<TInput: Debug + Clone, TOutput: Debug>: Sized {
+    fn new(input: TInput, is_update_progress: bool) -> Self;
+
     fn name() -> String;
-    fn run_internal(input: &TInput) -> Result<TOutput>;
+    fn run_internal(&self) -> Result<TOutput>;
 
     fn run(input: TInput) -> Result<()> {
         info!("{} started [{}={:?}]", Self::name(), name_of!(input), input);
 
-        let result = Self::run_internal(&input)?;
+        let algorithm = Self::new(input, true);
+
+        let result = algorithm.run_internal()?;
 
         info!(
             "{} finished [{}={:?}]",

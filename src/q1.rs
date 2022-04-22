@@ -35,18 +35,20 @@ impl RepetitionAlgorithmResult<Vec<usize>, usize> for Q1Result {
     }
 }
 
-pub struct SecreteryProblemAlgorithm();
+pub struct SecreteryProblemAlgorithm{
+    array: Vec<usize>
+}
 
 impl Algorithm<Vec<usize>, usize> for SecreteryProblemAlgorithm {
     fn name() -> String {
         "Secretery problem".into()
     }
 
-    fn run_internal(input: &Vec<usize>) -> Result<usize> {
+    fn run_internal(&self) -> Result<usize> {
         debug!("run_internal started");
 
-        let n = input.len();
-        let mut permutation = input.clone();
+        let n = self.array.len();
+        let mut permutation = self.array.clone();
         permutation.shuffle(&mut rand::thread_rng());
 
         let threshold = permutation
@@ -57,17 +59,23 @@ impl Algorithm<Vec<usize>, usize> for SecreteryProblemAlgorithm {
 
         let result = permutation
             .iter()
-            .skip(input.len() / 2)
+            .skip(self.array.len() / 2)
             .filter(|item| **item >= *threshold)
             .next()
             .map_or(
-                input.last().ok_or(Error::msg("no items in array"))?.clone(),
+                self.array.last().ok_or(Error::msg("no items in array"))?.clone(),
                 |item| item.clone(),
             );
 
         debug!("run_internal finished [{}={}]", name_of!(result), result);
 
         Ok(result)
+    }
+
+    fn new(input: Vec<usize>, _is_update_progress: bool) -> Self {
+        Self{
+            array: input
+        }
     }
 }
 
