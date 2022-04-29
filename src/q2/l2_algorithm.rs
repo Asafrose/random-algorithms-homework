@@ -4,33 +4,42 @@ use nameof::name_of;
 
 use crate::{common::algorithm::Algorithm, q2::hash_function::HashFunction};
 
-pub struct L2Algorithm{
-    array: Vec<i32>
+pub struct L2Algorithm {
+    array: Vec<f64>,
 }
 
-impl Algorithm<Vec<i32>, i32> for L2Algorithm {
-    fn name() -> String {
+impl L2Algorithm {
+    pub fn new(array: Vec<f64>) -> Self {
+        Self { array }
+    }
+}
+
+impl Algorithm for L2Algorithm {
+    type Input = Vec<f64>;
+    type Output = f64;
+
+    fn name(&self) -> String {
         "l2 algorithm".into()
     }
 
-    fn run_internal(&self) -> Result<i32> {
+    fn input(&self) -> Self::Input {
+        self.array.clone()
+    }
+
+    fn run_internal<F: Fn() + Send + Sync>(&self, update_progress: F) -> Result<f64> {
         debug!("run_internal started");
 
-        let hash_function = HashFunction::new(0..self.array.len(), [-1, 1]);
+        let hash_function = HashFunction::new(0..self.array.len(), [-1 as f64, 1 as f64]);
 
         let result = (0..self.array.len())
             .map(|num| hash_function.get_value(&num) * self.array[num])
-            .sum::<i32>()
-            .pow(2);
+            .sum::<f64>()
+            .powi(2);
 
         debug!("run_internal finished [{}={}]", name_of!(result), result);
 
-        Ok(result)
-    }
+        update_progress();
 
-    fn new(input: Vec<i32>, _is_update_progress: bool) -> Self {
-        Self{
-            array: input
-        }
+        Ok(result)
     }
 }

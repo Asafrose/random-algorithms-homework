@@ -6,12 +6,9 @@ mod q2_naive_command;
 use anyhow::Result;
 use clap::{Args, Subcommand};
 
-use crate::{common::algorithm::Algorithm, extensions::vec_extensions::SampleUniformVecExtensions};
+use crate::extensions::vec_extensions::SampleUniformVecExtensions;
 
-use self::{
-    q2_amplificated_command::Q2AmplificatedCommand,
-    q2_naive_command::{Q2NaiveAlgorithm, Q2NaiveAlgorithmInput},
-};
+use self::{q2_amplificated_command::Q2AmplificatedCommand, q2_naive_command::Q2NaiveCommand};
 
 #[derive(Debug, Args)]
 pub struct Q2Command {
@@ -21,10 +18,13 @@ pub struct Q2Command {
 
 impl Q2Command {
     pub fn invoke(&self) -> Result<()> {
-        let array = Vec::with_random_items_in_range(1000, || 0..=2);
+        let array = Vec::with_random_items_in_range(1000, || 0..=2)
+            .into_iter()
+            .map(|item| item as f64)
+            .collect();
 
         match &self.command {
-            Commands::Naive => Q2NaiveAlgorithm::run(Q2NaiveAlgorithmInput { array }),
+            Commands::Naive(command) => command.invoke(array),
             Commands::Amplificated(command) => command.invoke(array),
         }
     }
@@ -33,7 +33,7 @@ impl Q2Command {
 #[derive(Debug, Subcommand)]
 enum Commands {
     ///Runs the L2 algorithm without amplification
-    Naive,
+    Naive(Q2NaiveCommand),
     ///Runs the L2 algorithm with amplification
     Amplificated(Q2AmplificatedCommand),
 }

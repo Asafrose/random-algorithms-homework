@@ -1,11 +1,9 @@
 use anyhow::Result;
+use clap::Args;
 
 use crate::{
     common::{
-        algorithm::Algorithm,
-        repetition_algorithm::{
-            RepetitionAlgorithm, RepetitionAlgorithmInput, RepetitionAlgorithmResult,
-        },
+        algorithm::Algorithm, reduce::IntoReduce, repeat::IntoRepeat, with_name::IntoWithName,
     },
     extensions::vec_extensions::L2NormVecExtension,
 };
@@ -13,50 +11,28 @@ use crate::{
 use super::l2_algorithm::L2Algorithm;
 
 #[derive(Debug)]
-pub struct Q2NativeAlgorithmResult {
-    _average: f32,
-    _l2_norm: i32,
+pub struct Q2NaiveAlgorithmResult {
+    _average: f64,
+    _l2_norm: f64,
 }
 
-impl RepetitionAlgorithmResult<Vec<i32>, i32> for Q2NativeAlgorithmResult {
-    fn new(input: &Vec<i32>, series: Vec<i32>) -> Result<Self> {
-        let average = series.iter().sum::<i32>() as f32 / series.len() as f32;
-        let l2_norm = input.l2_norm();
+#[derive(Debug, Args)]
+pub struct Q2NaiveCommand;
 
-        Ok(Q2NativeAlgorithmResult {
-            _average: average,
-            _l2_norm: l2_norm,
-        })
-    }
-}
+impl Q2NaiveCommand {
+    pub fn invoke(&self, array: Vec<f64>) -> Result<()> {
+        L2Algorithm::new(array.clone())
+            .repeat(1000)
+            .reduce(move |series| {
+                let average = series.iter().sum::<f64>() / series.len() as f64;
+                let l2_norm = array.l2_norm();
 
-#[derive(Debug, Clone)]
-pub struct Q2NaiveAlgorithmInput {
-    pub array: Vec<i32>,
-}
-
-pub struct Q2NaiveAlgorithm {
-    inner: RepetitionAlgorithm<L2Algorithm, Q2NativeAlgorithmResult, Vec<i32>, i32>,
-}
-
-impl Algorithm<Q2NaiveAlgorithmInput, Q2NativeAlgorithmResult> for Q2NaiveAlgorithm {
-    fn name() -> String {
-        "q2 naive algorithm".into()
-    }
-
-    fn run_internal(&self) -> Result<Q2NativeAlgorithmResult> {
-        self.inner.run_internal()
-    }
-
-    fn new(input: Q2NaiveAlgorithmInput, is_update_progress: bool) -> Self {
-        Self {
-            inner: RepetitionAlgorithm::<L2Algorithm, Q2NativeAlgorithmResult, Vec<i32>, i32>::new(
-                RepetitionAlgorithmInput {
-                    input: input.array.clone(),
-                    repetition_count: 1000,
-                },
-                is_update_progress
-            ),
-        }
+                Ok(Q2NaiveAlgorithmResult {
+                    _average: average,
+                    _l2_norm: l2_norm,
+                })
+            })
+            .with_name("Q2 Naive Algorithm".into())
+            .run()
     }
 }
