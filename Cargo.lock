@@ -66,6 +66,7 @@ dependencies = [
 [[package]]
 name = "clap-md"
 version = "0.1.0"
+source = "git+https://github.com/Asafrose/clap-md#f39fa6e8da2b0aaff2784ccb43643244bcfe2554"
 dependencies = [
  "clap",
  "pulldown-cmark",
@@ -450,7 +451,6 @@ dependencies = [
  "clap-md",
  "env_logger",
  "indicatif",
- "lazy_static",
  "log",
  "nameof",
  "rand",

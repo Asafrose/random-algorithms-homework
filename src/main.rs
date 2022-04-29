@@ -1,6 +1,4 @@
-use std::{fs::File, io::Write};
-
-use clap::{StructOpt, IntoApp};
+use clap::StructOpt;
 use command_line_arguments::CommandLineArguments;
 use env_logger::Env;
 mod command_line_arguments;
