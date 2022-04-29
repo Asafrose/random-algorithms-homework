@@ -2,7 +2,7 @@ use std::{fmt::Debug};
 
 use anyhow::Result;
 use indicatif::{ProgressBar, ProgressStyle};
-use log::info;
+use log::{info, debug};
 use nameof::name_of;
 
 pub trait Algorithm: Sized {
@@ -19,7 +19,8 @@ pub trait Algorithm: Sized {
     fn run_internal<F: Fn() + Sync + Send>(&self, update_progress: F) -> Result<Self::Output>;
 
     fn run(&self) -> Result<()> {
-        info!("{} started [{}={:?}]", self.name(), "input", self.input());
+        info!("{} started", self.name());
+        debug!("{}={:?}", "input", self.input());
 
         let progress = ProgressBar::new(self.get_repetitions())
             .with_style(

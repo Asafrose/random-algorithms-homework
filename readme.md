@@ -8,6 +8,8 @@ Arguments:
 
 * `--version`: Print version information
 
+* `-d/--debug`
+
 ## Subcommands
 
 ### q1
@@ -73,3 +75,15 @@ Arguments:
 * `-e/--epsilon=<epsilon>`: epsilon value
 
 * `-d/--delta=<delta>`: delta value
+
+### document
+
+Run Documentation process
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* `-p/--path=<path>`
